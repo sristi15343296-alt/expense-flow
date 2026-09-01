@@ -1,0 +1,57 @@
+{% extends "tracker/base.html" %}
+{% block title %}Edit Transaction - ExpenseFlow{% endblock %}
+{% block content %}
+<div class="card" style="max-width:560px; margin:0 auto;">
+  <h2 style="font-weight:800; margin-bottom:4px;">Edit Transaction</h2>
+  <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:18px;">Update details.</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="id_transaction_type" class="form-label">Type</label>
+      <select name="transaction_type" id="id_transaction_type" class="form-select" onchange="updateCategoryOptions(this.value)">
+        <option value="expense" {% if tx.transaction_type == 'expense' %}selected{% endif %}>Expense</option>
+        <option value="income" {% if tx.transaction_type == 'income' %}selected{% endif %}>Income</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="id_amount" class="form-label">Amount (₹)</label>
+      <input type="number" step="0.01" min="0.01" name="amount" id="id_amount" class="form-control" value="{{ tx.amount }}" required>
+    </div>
+    <div class="mb-3">
+      <label for="id_category" class="form-label">Category</label>
+      <select name="category" id="id_category" class="form-select">
+        {% if tx.transaction_type == 'income' %}
+          {% for c in income_cats %}<option value="{{ c }}" {% if tx.category == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+        {% else %}
+          {% for c in expense_cats %}<option value="{{ c }}" {% if tx.category == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+        {% endif %}
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="id_date" class="form-label">Date</label>
+      <input type="date" name="date" id="id_date" class="form-control" value="{{ tx.date|date:'Y-m-d' }}" required>
+    </div>
+    <div class="mb-3">
+      <label for="id_description" class="form-label">Description</label>
+      <input type="text" name="description" id="id_description" class="form-control" value="{{ tx.description }}" placeholder="Optional note">
+    </div>
+    <button type="submit" class="btn btn-primary w-100" style="padding:12px; font-weight:700;">Update</button>
+  </form>
+  <a href="/transactions/" class="btn btn-ghost w-100" style="margin-top:10px;">Back</a>
+</div>
+<script>
+  const expenseCats = {{ expense_cats|safe }} || [];
+  const incomeCats = {{ income_cats|safe }} || [];
+  function updateCategoryOptions(type) {
+    const sel = document.getElementById('id_category');
+    const current = sel.value;
+    sel.innerHTML = '';
+    const list = type === 'income' ? incomeCats : expenseCats;
+    list.forEach(c => {
+      const o = document.createElement('option'); o.value = c; o.textContent = c;
+      if (c === current) o.selected = true;
+      sel.appendChild(o);
+    });
+  }
+</script>
+{% endblock %}
