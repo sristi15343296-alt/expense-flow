@@ -24,10 +24,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure--p-cfjn%xen*4x$9c44mkfghnr&q_^e+*uagj1h^7rh6lr_9h!'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', "False") == 'True'
-ALLOWED_HOSTS = ["*"]
-if os.environ.get('RENDER_EXTERNAL_HOSTNAME'):
-    ALLOWED_HOSTS.append(os.environ.get('RENDER_EXTERNAL_HOSTNAME'))
+DEBUG = os.environ.get("DEBUG", "False") == "True"
+
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    ".vercel.app",
+]
+
 CSRF_TRUSTED_ORIGINS = [
     "https://*.vercel.app",
 ]
