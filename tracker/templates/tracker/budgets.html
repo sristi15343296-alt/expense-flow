@@ -1,0 +1,41 @@
+{% extends "tracker/base.html" %}
+{% block title %}Budgets - ExpenseFlow{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3" style="flex-wrap:wrap; gap:10px;">
+  <h2 style="font-weight:800; font-size:1.2rem; margin:0;">Budgets</h2>
+  <a href="/budgets/add/" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New Budget</a>
+</div>
+
+{% if budgets %}
+<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px;">
+  {% for b in budgets %}
+  <div class="card" style="border-top:4px solid {% if b.status == 'over' %}#e05a5a{% elif b.status == 'warning' %}#e8a33b{% elif b.status == 'alert' %}#f4a261{% else %}#3cae6e{% endif %};">
+    <div class="d-flex justify-content-between align-items-start mb-2">
+      <h4 style="font-weight:700; font-size:1rem; margin:0;">{{ b.budget.category }}</h4>
+      <div style="font-size:0.8rem; font-weight:600; color:var(--text-secondary);">{{ b.budget.period|title }}</div>
+    </div>
+    <div class="d-flex justify-content-between align-items-end mb-2">
+      <div><span style="font-size:0.78rem; color:var(--text-secondary);">Budget</span><div style="font-weight:800; font-size:1.1rem;">₹{{ b.budget.amount }}</div></div>
+      <div><span style="font-size:0.78rem; color:var(--text-secondary);">Spent</span><div style="font-weight:800; font-size:1.1rem;">₹{{ b.spent }}</div></div>
+    </div>
+    <div style="margin-bottom:6px;"><div style="height:8px; background:var(--bg); border-radius:4px; overflow:hidden;"><div style="width:{{ b.pct }}%; height:100%; background:{% if b.status == 'over' %}#e05a5a{% elif b.status == 'warning' %}#e8a33b{% elif b.status == 'alert' %}#f4a261{% else %}#3cae6e{% endif %}; border-radius:4px;"></div></div></div>
+    <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:var(--text-secondary);">
+      <span>Remaining: ₹{{ b.remaining|floatformat:0 }}</span>
+      <span style="font-weight:600; color:{% if b.status == 'over' %}#e05a5a{% elif b.status == 'warning' %}#e8a33b{% elif b.status == 'alert' %}#f4a261{% else %}#3cae6e{% endif %};">{{ b.pct|floatformat:0 }}%</span>
+    </div>
+    <div style="display:flex; gap:6px; margin-top:10px;">
+      <a href="/budgets/edit/{{ b.budget.id }}/" class="btn btn-sm btn-ghost" style="flex:1; text-align:center;"><i class="bi bi-pencil-square"></i> Edit</a>
+      <form method="post" action="/budgets/delete/{{ b.budget.id }}/" style="display:inline; flex:1;" onsubmit="return confirm('Delete budget?');"><button type="submit" class="btn btn-sm btn-danger w-100"><i class="bi bi-trash"></i> Delete</button></form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card" style="text-align:center; padding:50px 20px; color:var(--text-secondary);">
+  <i class="bi bi-piggy-bank" style="font-size:3rem; color:var(--border);"></i>
+  <h3 style="font-weight:700; margin-top:12px;">No budgets yet</h3>
+  <p>Create monthly budgets to control spending.</p>
+  <a href="/budgets/add/" class="btn btn-primary">+ Create Budget</a>
+</div>
+{% endif %}
+{% endblock %}

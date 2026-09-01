@@ -1,0 +1,84 @@
+{% extends "tracker/base.html" %}
+{% block title %}Transactions - ExpenseFlow{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3" style="flex-wrap:wrap; gap:10px;">
+  <h2 style="font-weight:800; font-size:1.2rem; margin:0;">Transactions</h2>
+  <a href="/add/" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Transaction</a>
+</div>
+
+<!-- Filters -->
+<form method="get" action="/transactions/" class="d-flex gap-2 mb-3" style="flex-wrap:wrap;">
+  <input type="text" name="q" class="form-control" placeholder="Search description or category..." value="{{ q }}" style="min-width:220px; max-width:320px;">
+  <select name="category" class="form-select" style="width:auto; min-width:140px;">
+    <option value="">All categories</option>
+    {% for c in categories %}<option value="{{ c }}" {% if c == cat_filter %}selected{% endif %}>{{ c }}</option>{% endfor %}
+  </select>
+  <select name="type" class="form-select" style="width:auto; min-width:120px;">
+    <option value="">All types</option>
+    <option value="income" {% if type_filter == 'income' %}selected{% endif %}>Income</option>
+    <option value="expense" {% if type_filter == 'expense' %}selected{% endif %}>Expense</option>
+  </select>
+  <input type="date" name="start" class="form-control" value="{{ start }}" style="width:auto; min-width:140px;">
+  <input type="date" name="end" class="form-control" value="{{ end }}" style="width:auto; min-width:140px;">
+  <button type="submit" class="btn btn-primary" style="padding:8px 14px;"><i class="bi bi-search"></i></button>
+  <a href="/transactions/" class="btn btn-outline-secondary" style="padding:8px 14px;"><i class="bi bi-x-lg"></i></a>
+</form>
+
+<div class="card" style="padding:0; overflow:hidden;">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Type</th><th>Amount</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for tx in transactions %}
+        <tr>
+          <td>{{ tx.date }}</td>
+          <td><strong>{{ tx.description|default:tx.category }}</strong></td>
+          <td>{{ tx.category }}</td>
+          <td>{% if tx.transaction_type == 'income' %}<span class="badge-income">Income</span>{% else %}<span class="badge-expense">Expense</span>{% endif %}</td>
+          <td><strong>₹{{ tx.amount }}</strong></td>
+          <td>
+            <a href="/edit/{{ tx.id }}/" class="btn btn-sm btn-ghost"><i class="bi bi-pencil-square"></i></a>
+            <button onclick="openDeleteModal({{ tx.id }}, '{{ tx.description|default:tx.category }}', '{{ tx.amount }}')" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" style="text-align:center; padding:40px; color:var(--text-secondary);">
+          <i class="bi bi-inbox" style="font-size:2.5rem;"></i>
+          <p style="font-weight:600; margin-top:10px;">No transactions found.</p>
+          <a href="/add/" class="btn btn-primary" style="margin-top:8px;">+ Add Transaction</a>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:14px; border:none; background:var(--card);">
+      <div class="modal-header" style="border-bottom:1px solid var(--border);"><h5 class="modal-title" style="font-weight:800;">Delete Transaction?</h5><button type="button" class="btn-close" onclick="hideDeleteModal()"></button></div>
+      <div class="modal-body">Are you sure you want to delete <strong id="delete-item"></strong> (<strong id="delete-amount"></strong>)? This cannot be undone.</div>
+      <div class="modal-footer" style="border-top:1px solid var(--border);">
+        <button type="button" class="btn btn-ghost" onclick="hideDeleteModal()">Cancel</button>
+        <form id="deleteForm" method="post" action="" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openDeleteModal(id, name, amount) {
+    document.getElementById('delete-item').textContent = name;
+    document.getElementById('delete-amount').textContent = '₹'+amount;
+    document.getElementById('deleteForm').action = '/delete/'+id+'/';
+    const m = new bootstrap.Modal(document.getElementById('deleteModal'));
+    m.show();
+  }
+  function hideDeleteModal() { bootstrap.Modal.getInstance(document.getElementById('deleteModal'))?.hide(); }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

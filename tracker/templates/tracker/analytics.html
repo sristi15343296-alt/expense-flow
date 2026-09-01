@@ -1,0 +1,37 @@
+{% extends "tracker/base.html" %}
+{% block title %}Analytics - ExpenseFlow{% endblock %}
+{% block content %}
+<h2 style="font-weight:800; font-size:1.2rem; margin-bottom:4px;">Analytics</h2>
+<p style="color:var(--text-secondary); margin-bottom:22px;">Real data from your transactions.</p>
+
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap:20px;">
+  <div class="card">
+    <div class="card-title"><i class="bi bi-pie-chart" style="color:var(--primary);"></i> Expense by Category</div>
+    {% if exp_labels %}<div style="max-height:300px;"><canvas id="catChart"></canvas></div>{% else %}<p class="text-muted">No expense data.</p>{% endif %}
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="bi bi-bar-chart" style="color:var(--accent);"></i> Monthly Expenses</div>
+    {% if month_labels %}<div style="max-height:300px;"><canvas id="monthlyChart"></canvas></div>{% else %}<p class="text-muted">No monthly data.</p>{% endif %}
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="bi bi-cash-coin" style="color:#3cae6e;"></i> Income vs Expenses</div>
+    <div style="display:flex; gap:16px; align-items:center; justify-content:center; padding:20px 0;">
+      <div style="text-align:center;"><div style="font-size:1.8rem; font-weight:800; color:#3cae6e;">₹{{ income_total|floatformat:0 }}</div><div style="font-size:0.8rem; color:var(--text-secondary);">Income</div></div>
+      <div style="font-size:1.6rem; color:var(--text-secondary);">vs</div>
+      <div style="text-align:center;"><div style="font-size:1.8rem; font-weight:800; color:#e05a5a;">₹{{ expense_total|floatformat:0 }}</div><div style="font-size:0.8rem; color:var(--text-secondary);">Expenses</div></div>
+    </div>
+    <div style="max-height:260px;"><canvas id="compareChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="bi bi-graph-up" style="color:#7e57c2;"></i> Spending Trend (Last 30 Days)</div>
+    {% if trend_labels %}<div style="max-height:300px;"><canvas id="trendChart"></canvas></div>{% else %}<p class="text-muted">No trend data.</p>{% endif %}
+  </div>
+</div>
+
+<script>
+  new Chart(document.getElementById('catChart'), { type: 'doughnut', data: { labels: {{ exp_labels|safe }} || [], datasets: [{ data: {{ exp_values|safe }} || [], backgroundColor: ['#2d5b8a','#e8a33b','#3cae6e','#d9534f','#7e57c2','#f4a261','#4ecdc4','#ff6b6b','#ff9f43'], borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10, font: { size: 11 } } } } } });
+  new Chart(document.getElementById('monthlyChart'), { type: 'bar', data: { labels: {{ month_labels|safe }} || [], datasets: [{ label: 'Expenses', data: {{ month_values|safe }} || [], backgroundColor: '#2d5b8a', borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+  new Chart(document.getElementById('compareChart'), { type: 'bar', data: { labels: ['Income', 'Expenses'], datasets: [{ label: 'Amount', data: [{{ income_total|default:0 }}, {{ expense_total|default:0 }}], backgroundColor: ['#3cae6e', '#e05a5a'], borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+  new Chart(document.getElementById('trendChart'), { type: 'line', data: { labels: {{ trend_labels|safe }} || [], datasets: [{ label: 'Daily Expense', data: {{ trend_values|safe }} || [], borderColor: '#2d5b8a', backgroundColor: 'rgba(45,91,138,0.1)', tension: 0.3, fill: true, pointRadius: 3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+</script>
+{% endblock %}
