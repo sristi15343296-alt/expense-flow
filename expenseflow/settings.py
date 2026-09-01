@@ -25,14 +25,12 @@ SECRET_KEY = 'django-insecure--p-cfjn%xen*4x$9c44mkfghnr&q_^e+*uagj1h^7rh6lr_9h!
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', "False") == 'True'
-
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-]
+ALLOWED_HOSTS = ["*"]
 if os.environ.get('RENDER_EXTERNAL_HOSTNAME'):
     ALLOWED_HOSTS.append(os.environ.get('RENDER_EXTERNAL_HOSTNAME'))
-CSRF_TRUSTED_ORIGINS = ['https://*', 'http://*', 'https://expenseflow-live.loca.lt', 'https://8000-iz3uyy3pe2n8ze11a8irx.e2b.app', 'http://localhost:8000']
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.vercel.app",
+]
 CSRF_USE_SESSIONS = True
 SESSION_COOKIE_DOMAIN = None
 CSRF_COOKIE_DOMAIN = None
